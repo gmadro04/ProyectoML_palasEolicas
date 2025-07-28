@@ -24,6 +24,9 @@ class Config:
     
     # Configuración de modelos
     MODEL_SAVE_PATH = os.path.join(BASE_PATH, 'outputs', 'models')
+
+    # Configuración de análisis Directorio para guardar los análisis
+    ANALYSIS_OUTPUT_PATH = os.path.join(BASE_PATH, 'outputs', 'analysis')
     
     # Configuración de paralelismo
     N_WORKERS = max(1, os.cpu_count() - 1)  # Núcleos a usar para procesamiento paralelo
