@@ -7,6 +7,10 @@ from skimage.util import img_as_ubyte
 from skimage.measure import regionprops
 import pandas as pd
 from config import config
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import json
+
 
 class ImageProcessorVisualOnly:
     def __init__(self):
@@ -102,3 +106,33 @@ class ImageProcessorVisualOnly:
             }
         except:
             return {}
+        
+    def plot_defects(self, image_path, json_path, save_path):
+
+        if not os.path.exists(json_path):
+            print(f"JSON no encontrado: {json_path}")
+            return
+
+        with open(json_path, 'r') as f:
+            data = json.load(f)
+
+        if not data.get('defects'):
+            return
+
+        image = Image.open(image_path)
+        fig, ax = plt.subplots(1)
+        ax.imshow(image)
+
+        for defect in data['defects']:
+            x = defect['x']
+            y = defect['y']
+            width = defect.get('width', 10)
+            height = defect.get('height', 10)
+            rect = patches.Rectangle((x, y), width, height, linewidth=2, edgecolor='r', facecolor='none')
+            ax.add_patch(rect)
+
+        os.makedirs(os.path.dirname(save_path), exist_ok=True)
+        plt.axis('off')
+        plt.savefig(save_path, bbox_inches='tight', pad_inches=0)
+        plt.close()
+
