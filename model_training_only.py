@@ -59,7 +59,7 @@ models = {
         'knn__weights': ['uniform', 'distance'],
         'knn__metric': ['euclidean', 'manhattan']
     }),
-    'mlp': (MLPClassifier(max_iter=500), {
+    'mlp': (MLPClassifier(max_iter=1000), {
         'mlp__hidden_layer_sizes': [(50,), (100,)],
         'mlp__activation': ['relu'],
         'mlp__alpha': [0.0001, 0.01],

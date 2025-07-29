@@ -1,4 +1,3 @@
-
 import os
 import numpy as np
 from PIL import Image
@@ -107,32 +106,45 @@ class ImageProcessorVisualOnly:
         except:
             return {}
         
-    def plot_defects(self, image_path, json_path, save_path):
+    def plot_defects(self, sample_paths_labels, output_dir=None):
+        """
+        Muestra imágenes procesadas con máscara aplicada y su etiqueta (defectuosa o no).
+    
+        Args:
+        sample_paths_labels (list): Lista de tuplas (ruta_imagen, ruta_mascara, etiqueta)
+        output_dir (str, optional): Si se proporciona, guarda las imágenes en esa ruta
+        """
+        os.makedirs(output_dir, exist_ok=True) if output_dir else None
 
-        if not os.path.exists(json_path):
-            print(f"JSON no encontrado: {json_path}")
-            return
+        for idx, (img_path, mask_path, label) in enumerate(sample_paths_labels):
+            try:
+                img = Image.open(img_path).convert('L')
+                img_np = np.array(img)
 
-        with open(json_path, 'r') as f:
-            data = json.load(f)
+                if mask_path is not None and os.path.exists(mask_path):
+                    mask = Image.open(mask_path).convert('L')
+                    mask_np = np.array(mask) > 0
+                    masked_img = img_np * mask_np
+                else:
+                    masked_img = img_np
 
-        if not data.get('defects'):
-            return
+                plt.figure(figsize=(8, 4))
+                plt.subplot(1, 2, 1)
+                plt.imshow(img_np, cmap='gray')
+                plt.title('Original')
+                plt.axis('off')
 
-        image = Image.open(image_path)
-        fig, ax = plt.subplots(1)
-        ax.imshow(image)
+                plt.subplot(1, 2, 2)
+                plt.imshow(masked_img, cmap='gray')
+                plt.title(f'Máscara aplicada\nEtiqueta: {"Defectuosa" if label == 1 else "Sana"}')
+                plt.axis('off')
 
-        for defect in data['defects']:
-            x = defect['x']
-            y = defect['y']
-            width = defect.get('width', 10)
-            height = defect.get('height', 10)
-            rect = patches.Rectangle((x, y), width, height, linewidth=2, edgecolor='r', facecolor='none')
-            ax.add_patch(rect)
-
-        os.makedirs(os.path.dirname(save_path), exist_ok=True)
-        plt.axis('off')
-        plt.savefig(save_path, bbox_inches='tight', pad_inches=0)
-        plt.close()
+                if output_dir:
+                    save_path = os.path.join(output_dir, f"sample_{idx}_defecto_{label}.png")
+                    plt.savefig(save_path, bbox_inches='tight')
+                    plt.close()
+                else:
+                    plt.show()
+            except Exception as e:
+                print(f"Error generando imagen {img_path}: {e}")
 

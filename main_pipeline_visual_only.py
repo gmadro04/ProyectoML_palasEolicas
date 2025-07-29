@@ -107,17 +107,15 @@ class WindTurbineVisualOnlyPipeline:
 
         print(f"\nGenerando visualizaciones (visual only) para {len(defective_samples)} imágenes de ejemplo...")
 
+        # Crear lista de tuplas (img_path, mask_path, label)
+        sample_tuples = []
         for item in defective_samples:
-            try:
-                dir_name = os.path.basename(item['source_dir'])
-                save_dir = os.path.join(self.visualization_path, dir_name)
-                save_path = os.path.join(
-                    save_dir,
-                    os.path.basename(item['img_path'].replace('.jpg', '_defects.png')))
+            label = 1  # Son defectuosas ya que tienen json
+            mask = item['mask_path'] if item['mask_path'] and os.path.exists(item['mask_path']) else None
+            sample_tuples.append((item['img_path'], mask, label))
 
-                self.processor.plot_defects(item['img_path'], item['json_path'], save_path)
-            except Exception as e:
-                print(f"Error generando visualización para {item['img_path']}: {str(e)}")
+        self.processor.plot_defects(sample_tuples, output_dir=self.visualization_path)
+
 
 if __name__ == "__main__":
     pipeline = WindTurbineVisualOnlyPipeline()
